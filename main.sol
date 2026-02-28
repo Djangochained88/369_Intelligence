@@ -270,3 +270,71 @@ contract Intelligence369 {
             if (s < arr[i]) revert T369_ArithmeticOverflow();
         }
         return s;
+    }
+
+    /// @notice Product of array (first N elements, cap at T369_MAX_OPERANDS)
+    function productArray(uint256[] calldata arr, uint256 n) public pure returns (uint256) {
+        if (n == 0 || arr.length == 0) revert T369_EmptyOperands();
+        if (n > arr.length || n > T369_MAX_OPERANDS) revert T369_ArrayLengthMismatch();
+        uint256 p = 1;
+        for (uint256 i = 0; i < n; i++) {
+            uint256 prev = p;
+            p *= arr[i];
+            if (arr[i] != 0 && p / arr[i] != prev) revert T369_ArithmeticOverflow();
+        }
+        return p;
+    }
+
+    /// @notice Min of two
+    function min2(uint256 a, uint256 b) public pure returns (uint256) {
+        return a < b ? a : b;
+    }
+
+    /// @notice Max of two
+    function max2(uint256 a, uint256 b) public pure returns (uint256) {
+        return a > b ? a : b;
+    }
+
+    /// @notice Average (a+b)/2
+    function average(uint256 a, uint256 b) public pure returns (uint256) {
+        return (a + b) / 2;
+    }
+
+    /// @notice Full multiply then divide: (a*b)/denom
+    function mulDiv(uint256 a, uint256 b, uint256 denom) public pure returns (uint256) {
+        if (denom == 0) revert T369_DivisionByZero();
+        uint256 p = a * b;
+        if (p / a != b) revert T369_ArithmeticOverflow();
+        return p / denom;
+    }
+
+    /// @notice Scaled ratio: (a * scale) / b
+    function scaledRatio(uint256 a, uint256 b, uint256 scale) public pure returns (uint256) {
+        if (b == 0) revert T369_DivisionByZero();
+        uint256 t = a * scale;
+        if (t / a != scale) revert T369_ArithmeticOverflow();
+        return t / b;
+    }
+
+    // -------------------------------------------------------------------------
+    // STATE-CHANGING: TRIAD RESOLVE
+    // -------------------------------------------------------------------------
+
+    function resolveTriad(uint256 magnitude, uint256 phase) external nonReentrant returns (uint256 triadSumResult) {
+        if (magnitude == 0) revert T369_ZeroMagnitude();
+        if (magnitude > magnitudeBound) revert T369_MagnitudeBoundExceeded();
+        if (phase > T369_MAX_PHASE) revert T369_PhaseOutOfRange();
+        triadSumResult = triadSum();
+        uint256 ts = triadSumResult;
+        emit TriadResolved(magnitude, phase, ts, msg.sender, block.number);
+        return ts;
+    }
+
+    // -------------------------------------------------------------------------
+    // STATE-CHANGING: FLUX
+    // -------------------------------------------------------------------------
+
+    function computeFlux(uint256 inputVal) external nonReentrant returns (uint256 outputVal) {
+        if (inputVal > T369_MAX_MAGNITUDE) revert T369_MagnitudeBoundExceeded();
+        outputVal = digitalRoot(inputVal) * T369_SCALE + (inputVal % T369_BASE);
+        if (outputVal > T369_MAX_MAGNITUDE) outputVal = outputVal % T369_MAX_MAGNITUDE;
