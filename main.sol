@@ -134,3 +134,71 @@ contract Intelligence369 {
     function isTriadResonant(uint256 value) public pure returns (bool) {
         uint256 s = digitSum(value);
         while (s > 9) s = digitSum(s);
+        return s == T369_TRIAD_A || s == T369_TRIAD_B || s == T369_TRIAD_C;
+    }
+
+    /// @notice Sum of decimal digits of value
+    function digitSum(uint256 value) public pure returns (uint256) {
+        uint256 sum = 0;
+        while (value != 0) {
+            sum += value % 10;
+            value /= 10;
+        }
+        return sum;
+    }
+
+    /// @notice Reduce to single digit (digital root)
+    function digitalRoot(uint256 value) public pure returns (uint256) {
+        uint256 r = value % 9;
+        return r == 0 ? (value == 0 ? 0 : 9) : r;
+    }
+
+    /// @notice Magnitude scaled by T369_SCALE, capped
+    function scaleMagnitude(uint256 raw) public view returns (uint256) {
+        if (raw > magnitudeBound) revert T369_MagnitudeBoundExceeded();
+        if (raw > type(uint256).max / T369_SCALE) revert T369_ArithmeticOverflow();
+        return raw * T369_SCALE;
+    }
+
+    /// @notice Phase within [0, triadSum] cycle
+    function phaseInCycle(uint256 timestamp) public pure returns (uint256) {
+        return timestamp % (T369_TRIAD_A + T369_TRIAD_B + T369_TRIAD_C);
+    }
+
+    /// @notice Verify three values form a valid triad (sum divisible by 3)
+    function verifyTriad(uint256 a, uint256 b, uint256 c) public pure returns (bool) {
+        uint256 s = a + b + c;
+        return s % T369_TRIAD_A == 0;
+    }
+
+    /// @notice Harmonic mean of two values (2*a*b/(a+b)) with scale
+    function harmonicMean(uint256 a, uint256 b) public pure returns (uint256) {
+        if (a == 0 && b == 0) return 0;
+        if (a + b == 0) revert T369_DivisionByZero();
+        uint256 p = a * b;
+        if (p / a != b) revert T369_ArithmeticOverflow();
+        uint256 s = a + b;
+        return (2 * p) / s;
+    }
+
+    /// @notice Geometric mean sqrt(a*b) approximated with scale
+    function geometricMeanApprox(uint256 a, uint256 b) public pure returns (uint256) {
+        if (a == 0 || b == 0) return 0;
+        uint256 p = a * b;
+        if (p / a != b) revert T369_ArithmeticOverflow();
+        uint256 x = (a + b) / 2;
+        for (uint256 i = 0; i < 32; i++) {
+            if (x == 0) break;
+            uint256 nx = (x + p / x) / 2;
+            if (nx >= x) break;
+            x = nx;
+        }
+        return x;
+    }
+
+    /// @notice Factorial up to 20 (fits in uint256)
+    function factorial(uint256 n) public pure returns (uint256) {
+        if (n > 20) revert T369_MagnitudeBoundExceeded();
+        if (n == 0) return 1;
+        uint256 r = 1;
+        for (uint256 i = 2; i <= n; i++) {
