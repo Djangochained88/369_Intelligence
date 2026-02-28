@@ -406,3 +406,71 @@ contract Intelligence369 {
         emit ResonantPointRecorded(x, y, block.number);
     }
 
+    // -------------------------------------------------------------------------
+    // SUPER CALC: BATCH EXECUTE AND EMIT
+    // -------------------------------------------------------------------------
+
+    function executeSuperCalc(uint256[] calldata operands) external nonReentrant returns (uint256 result) {
+        if (operands.length == 0) revert T369_EmptyOperands();
+        if (operands.length > T369_MAX_OPERANDS) revert T369_ArrayLengthMismatch();
+        result = sumArray(operands);
+        if (result > T369_MAX_MAGNITUDE) result = result % T369_MAX_MAGNITUDE;
+        bytes32 opHash = keccak256(abi.encodePacked(operands, block.timestamp));
+        emit SuperCalcExecuted(opHash, operands, result, block.number);
+        return result;
+    }
+
+    /// @notice Verify triad and emit
+    function verifyAndEmitTriad(uint256 a, uint256 b, uint256 c) external nonReentrant {
+        bool valid = verifyTriad(a, b, c);
+        emit TriadVerified(a, b, c, valid, block.number);
+    }
+
+    // -------------------------------------------------------------------------
+    // BATCH VIEW HELPERS
+    // -------------------------------------------------------------------------
+
+    function batchDigitalRoots(uint256[] calldata values) external pure returns (uint256[] memory roots) {
+        roots = new uint256[](values.length);
+        for (uint256 i = 0; i < values.length; i++) {
+            roots[i] = digitalRoot(values[i]);
+        }
+    }
+
+    function batchTriadResonant(uint256[] calldata values) external pure returns (bool[] memory flags) {
+        flags = new bool[](values.length);
+        for (uint256 i = 0; i < values.length; i++) {
+            flags[i] = isTriadResonant(values[i]);
+        }
+    }
+
+    function batchMod369(uint256[] calldata values) external pure returns (uint256[] memory mods) {
+        mods = new uint256[](values.length);
+        for (uint256 i = 0; i < values.length; i++) {
+            mods[i] = values[i] % T369_BASE;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // EXTENDED TRIAD MATH (pure)
+    // -------------------------------------------------------------------------
+
+    function triadSumSquared() public pure returns (uint256) {
+        uint256 t = triadSum();
+        return t * t;
+    }
+
+    function triadProductPlusSum() public pure returns (uint256) {
+        return triadProduct() + triadSum();
+    }
+
+    function magnitudeToTriadScale(uint256 m) public pure returns (uint256) {
+        if (m > type(uint256).max / T369_BASE) revert T369_ArithmeticOverflow();
+        return m * T369_BASE;
+    }
+
+    function digitSumLoop(uint256 value, uint256 maxIter) public pure returns (uint256) {
+        uint256 s = value;
+        for (uint256 i = 0; i < maxIter && s > 9; i++) {
+            s = digitSum(s);
+        }
