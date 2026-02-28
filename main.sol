@@ -338,3 +338,71 @@ contract Intelligence369 {
         if (inputVal > T369_MAX_MAGNITUDE) revert T369_MagnitudeBoundExceeded();
         outputVal = digitalRoot(inputVal) * T369_SCALE + (inputVal % T369_BASE);
         if (outputVal > T369_MAX_MAGNITUDE) outputVal = outputVal % T369_MAX_MAGNITUDE;
+        bytes32 fluxHash = keccak256(abi.encodePacked(inputVal, outputVal, block.timestamp, block.prevrandao));
+        emit FluxComputed(inputVal, outputVal, fluxHash, block.number);
+        return outputVal;
+    }
+
+    // -------------------------------------------------------------------------
+    // KEEPER: HARMONIC SLOTS
+    // -------------------------------------------------------------------------
+
+    function storeHarmonic(uint256 slot, uint256 value) external onlyKeeper nonReentrant {
+        if (slot >= T369_MAX_SLOTS) revert T369_InvalidSlot();
+        if (value > T369_MAX_MAGNITUDE) revert T369_MagnitudeBoundExceeded();
+        _harmonicSlots[slot] = value;
+        if (slot >= harmonicSlotCount) harmonicSlotCount = slot + 1;
+        emit HarmonicStored(slot, value, block.number);
+    }
+
+    function getHarmonic(uint256 slot) external view returns (uint256) {
+        if (slot >= T369_MAX_SLOTS) revert T369_InvalidSlot();
+        return _harmonicSlots[slot];
+    }
+
+    // -------------------------------------------------------------------------
+    // CURATOR: MAGNITUDE BOUND
+    // -------------------------------------------------------------------------
+
+    function setMagnitudeBound(uint256 newBound) external onlyCurator {
+        if (newBound > T369_MAX_MAGNITUDE) revert T369_MagnitudeBoundExceeded();
+        uint256 oldBound = magnitudeBound;
+        magnitudeBound = newBound;
+        emit MagnitudeBoundSet(oldBound, newBound, msg.sender, block.number);
+    }
+
+    // -------------------------------------------------------------------------
+    // ORACLE: RECORD RESULT
+    // -------------------------------------------------------------------------
+
+    function invokeOracle(uint256 queryId, uint256 result) external onlyOracle nonReentrant {
+        if (result > T369_MAX_MAGNITUDE) revert T369_MagnitudeBoundExceeded();
+        _lastOracleResult[queryId] = result;
+        oracleCallCount++;
+        emit OracleInvoked(queryId, result, block.number);
+    }
+
+    function getLastOracleResult(uint256 queryId) external view returns (uint256) {
+        return _lastOracleResult[queryId];
+    }
+
+    // -------------------------------------------------------------------------
+    // KEEPER: PHASE
+    // -------------------------------------------------------------------------
+
+    function updatePhaseLock(uint256 newPhase) external onlyKeeper {
+        if (newPhase > T369_MAX_PHASE) revert T369_PhaseOutOfRange();
+        uint256 oldPhase = currentPhase;
+        currentPhase = newPhase;
+        emit PhaseLockUpdated(oldPhase, newPhase, block.number);
+    }
+
+    // -------------------------------------------------------------------------
+    // RECORD RESONANT POINT (any caller)
+    // -------------------------------------------------------------------------
+
+    function recordResonantPoint(uint256 x, uint256 y) external nonReentrant {
+        if (x > T369_MAX_MAGNITUDE || y > T369_MAX_MAGNITUDE) revert T369_MagnitudeBoundExceeded();
+        emit ResonantPointRecorded(x, y, block.number);
+    }
+
