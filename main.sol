@@ -202,3 +202,71 @@ contract Intelligence369 {
         if (n == 0) return 1;
         uint256 r = 1;
         for (uint256 i = 2; i <= n; i++) {
+            r *= i;
+        }
+        return r;
+    }
+
+    /// @notice Power mod (base^exp % mod)
+    function powMod(uint256 base, uint256 exp, uint256 mod) public pure returns (uint256) {
+        if (mod == 0) revert T369_DivisionByZero();
+        uint256 r = 1;
+        base = base % mod;
+        while (exp > 0) {
+            if (exp & 1 != 0) r = (r * base) % mod;
+            exp >>= 1;
+            base = (base * base) % mod;
+        }
+        return r;
+    }
+
+    /// @notice GCD
+    function gcd(uint256 a, uint256 b) public pure returns (uint256) {
+        while (b != 0) {
+            uint256 t = b;
+            b = a % b;
+            a = t;
+        }
+        return a;
+    }
+
+    /// @notice LCM
+    function lcm(uint256 a, uint256 b) public pure returns (uint256) {
+        if (a == 0 || b == 0) return 0;
+        uint256 g = gcd(a, b);
+        uint256 p = a * b;
+        if (p / a != b) revert T369_ArithmeticOverflow();
+        return p / g;
+    }
+
+    /// @notice Is value divisible by 369
+    function divisibleBy369(uint256 value) public pure returns (bool) {
+        return value % T369_BASE == 0;
+    }
+
+    /// @notice Remainder when divided by 369
+    function mod369(uint256 value) public pure returns (uint256) {
+        return value % T369_BASE;
+    }
+
+    /// @notice Triple product a*b*c with overflow check
+    function tripleProduct(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        uint256 p = a * b;
+        if (p / a != b) revert T369_ArithmeticOverflow();
+        uint256 q = p * c;
+        if (q / p != c) revert T369_ArithmeticOverflow();
+        return q;
+    }
+
+    // -------------------------------------------------------------------------
+    // SUPER CALCULATOR (view)
+    // -------------------------------------------------------------------------
+
+    /// @notice Sum of array
+    function sumArray(uint256[] calldata arr) public pure returns (uint256) {
+        uint256 s = 0;
+        for (uint256 i = 0; i < arr.length; i++) {
+            s += arr[i];
+            if (s < arr[i]) revert T369_ArithmeticOverflow();
+        }
+        return s;
