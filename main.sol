@@ -66,3 +66,71 @@ contract Intelligence369 {
     uint256 public immutable deployBlock;
 
     // -------------------------------------------------------------------------
+    // STATE
+    // -------------------------------------------------------------------------
+
+    uint256 public magnitudeBound = 1e24;
+    uint256 public currentPhase;
+    uint256 private _reentrancyLock;
+    mapping(uint256 => uint256) private _harmonicSlots;
+    uint256 public harmonicSlotCount;
+    mapping(uint256 => uint256) private _lastOracleResult;
+    uint256 public oracleCallCount;
+
+    // -------------------------------------------------------------------------
+    // CONSTRUCTOR
+    // -------------------------------------------------------------------------
+
+    constructor() {
+        curator = address(0xB7f2E9a1C4d6F8b0E3A5c7D9f1B4e6A8c0D2F5a7);
+        oracle = address(0xD3a6C9e2F5b8A1d4E7c0B3f6A9d2C5e8F1b4A7c0);
+        keeper = address(0xE8F1b4A7c0D3e6F9a2C5d8B1E4f7A0c3D6e9F2b5);
+        deployBlock = block.number;
+        currentPhase = block.timestamp % (T369_TRIAD_A + T369_TRIAD_B + T369_TRIAD_C);
+        if (curator == address(0) || oracle == address(0) || keeper == address(0)) revert T369_ZeroAddress();
+    }
+
+    // -------------------------------------------------------------------------
+    // MODIFIERS
+    // -------------------------------------------------------------------------
+
+    modifier onlyCurator() {
+        if (msg.sender != curator) revert T369_NotCurator();
+        _;
+    }
+
+    modifier onlyOracle() {
+        if (msg.sender != oracle) revert T369_NotOracle();
+        _;
+    }
+
+    modifier onlyKeeper() {
+        if (msg.sender != keeper) revert T369_NotKeeper();
+        _;
+    }
+
+    modifier nonReentrant() {
+        if (_reentrancyLock != 0) revert T369_ReentrantCall();
+        _reentrancyLock = 1;
+        _;
+        _reentrancyLock = 0;
+    }
+
+    // -------------------------------------------------------------------------
+    // TRIAD & NUMBER THEORY (view)
+    // -------------------------------------------------------------------------
+
+    /// @notice Sum of Tesla triad digits (3 + 6 + 9)
+    function triadSum() public pure returns (uint256) {
+        return T369_TRIAD_A + T369_TRIAD_B + T369_TRIAD_C;
+    }
+
+    /// @notice Product of triad digits
+    function triadProduct() public pure returns (uint256) {
+        return T369_TRIAD_A * T369_TRIAD_B * T369_TRIAD_C;
+    }
+
+    /// @notice Check if value reduces to 3, 6, or 9 via digit sum (simplified)
+    function isTriadResonant(uint256 value) public pure returns (bool) {
+        uint256 s = digitSum(value);
+        while (s > 9) s = digitSum(s);
