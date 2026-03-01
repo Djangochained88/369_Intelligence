@@ -1290,3 +1290,71 @@ contract Intelligence369 {
     function allTriadResonant(uint256[] calldata arr) public pure returns (bool) {
         for (uint256 i = 0; i < arr.length; i++) {
             if (!isTriadResonant(arr[i])) return false;
+        }
+        return arr.length > 0;
+    }
+
+    function allDivisibleBy369(uint256[] calldata arr) public pure returns (bool) {
+        for (uint256 i = 0; i < arr.length; i++) {
+            if (!divisibleBy369(arr[i])) return false;
+        }
+        return arr.length > 0;
+    }
+
+    function sumMod369(uint256[] calldata arr) public pure returns (uint256) {
+        uint256 s = 0;
+        for (uint256 i = 0; i < arr.length; i++) {
+            s += arr[i] % T369_BASE;
+            if (s >= T369_BASE) s -= T369_BASE;
+        }
+        return s % T369_BASE;
+    }
+
+    function productMod369(uint256[] calldata arr) public pure returns (uint256) {
+        if (arr.length == 0) revert T369_EmptyOperands();
+        uint256 p = 1;
+        for (uint256 i = 0; i < arr.length; i++) {
+            p = (p * (arr[i] % T369_BASE)) % T369_BASE;
+        }
+        return p;
+    }
+
+    function triadReduceBatch(uint256[] calldata arr) public pure returns (uint256[] memory out) {
+        out = new uint256[](arr.length);
+        for (uint256 i = 0; i < arr.length; i++) {
+            out[i] = digitalRoot(arr[i]);
+        }
+    }
+
+    function fluxEncode(uint256 value) public pure returns (uint256) {
+        uint256 dr = digitalRoot(value);
+        uint256 m = value % T369_BASE;
+        return dr * T369_BASE + m;
+    }
+
+    function fluxDecode(uint256 encoded) public pure returns (uint256 digitalRootVal, uint256 modVal) {
+        digitalRootVal = encoded / T369_BASE;
+        modVal = encoded % T369_BASE;
+    }
+
+    function triadChecksum(uint256[] calldata arr) public pure returns (uint256) {
+        uint256 h = 0;
+        for (uint256 i = 0; i < arr.length; i++) {
+            h = uint256(keccak256(abi.encodePacked(h, arr[i], i)));
+        }
+        return h % T369_BASE;
+    }
+
+    function magnitudeChecksum(uint256 value) public pure returns (uint256) {
+        return (digitSum(value) + digitalRoot(value) + (value % T369_BASE)) % T369_SCALE;
+    }
+
+    function phaseFromTimestamp(uint256 ts) public pure returns (uint256) {
+        return ts % (T369_TRIAD_A + T369_TRIAD_B + T369_TRIAD_C);
+    }
+
+    function triadCyclePosition(uint256 value) public pure returns (uint256) {
+        return value % triadSum();
+    }
+
+    function isInTriadCycle(uint256 value, uint256 phase) public pure returns (bool) {
