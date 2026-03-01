@@ -882,3 +882,71 @@ contract Intelligence369 {
             out[i] = mulDiv(a[i], b[i], denom[i]);
         }
     }
+
+    function gcdBatch(uint256[] calldata values) public pure returns (uint256) {
+        if (values.length == 0) revert T369_EmptyOperands();
+        uint256 g = values[0];
+        for (uint256 i = 1; i < values.length; i++) {
+            g = gcd(g, values[i]);
+        }
+        return g;
+    }
+
+    function lcmBatch(uint256[] calldata values) public pure returns (uint256) {
+        if (values.length == 0) revert T369_EmptyOperands();
+        uint256 l = values[0];
+        for (uint256 i = 1; i < values.length; i++) {
+            l = lcm(l, values[i]);
+        }
+        return l;
+    }
+
+    function factorialBatch(uint256[] calldata ns) public pure returns (uint256[] memory out) {
+        out = new uint256[](ns.length);
+        for (uint256 i = 0; i < ns.length; i++) {
+            out[i] = factorial(ns[i]);
+        }
+    }
+
+    function triangularBatch(uint256[] calldata ns) public pure returns (uint256[] memory out) {
+        out = new uint256[](ns.length);
+        for (uint256 i = 0; i < ns.length; i++) {
+            out[i] = triangularNumber(ns[i]);
+        }
+    }
+
+    function fluxHash(bytes32 seed) public view returns (bytes32) {
+        return keccak256(abi.encodePacked(seed, block.timestamp, block.prevrandao, currentPhase, magnitudeBound));
+    }
+
+    function resonanceScore(uint256 value) public pure returns (uint256) {
+        uint256 dr = digitalRoot(value);
+        uint256 m = mod369(value);
+        uint256 ds = digitSum(value);
+        return dr * T369_BASE + m + ds;
+    }
+
+    function triadAlignment(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        if (!verifyTriad(a, b, c)) return 0;
+        return (a + b + c) / T369_TRIAD_A;
+    }
+
+    function magnitudePhaseEncode(uint256 magnitude, uint256 phase) public pure returns (uint256) {
+        if (phase >= T369_SCALE) revert T369_PhaseOutOfRange();
+        if (magnitude > type(uint256).max / T369_SCALE) revert T369_ArithmeticOverflow();
+        return magnitude * T369_SCALE + phase;
+    }
+
+    function magnitudePhaseDecode(uint256 encoded) public pure returns (uint256 magnitude, uint256 phase) {
+        magnitude = encoded / T369_SCALE;
+        phase = encoded % T369_SCALE;
+    }
+
+    // -------------------------------------------------------------------------
+    // EXTENDED SUPER CALCULATOR (pure)
+    // -------------------------------------------------------------------------
+
+    function add3(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        uint256 s = a + b;
+        if (s < a) revert T369_ArithmeticOverflow();
+        s += c;
