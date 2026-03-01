@@ -1086,3 +1086,71 @@ contract Intelligence369 {
             r = r * x + coeffs[i];
         }
         return r;
+    }
+
+    function dotProduct(uint256[] calldata a, uint256[] calldata b) public pure returns (uint256) {
+        if (a.length != b.length) revert T369_ArrayLengthMismatch();
+        uint256 s = 0;
+        for (uint256 i = 0; i < a.length; i++) {
+            uint256 p = a[i] * b[i];
+            if (b[i] != 0 && p / b[i] != a[i]) revert T369_ArithmeticOverflow();
+            s += p;
+            if (s < p) revert T369_ArithmeticOverflow();
+        }
+        return s;
+    }
+
+    function cumSum(uint256[] calldata arr) public pure returns (uint256[] memory out) {
+        out = new uint256[](arr.length);
+        uint256 s = 0;
+        for (uint256 i = 0; i < arr.length; i++) {
+            s += arr[i];
+            if (s < arr[i]) revert T369_ArithmeticOverflow();
+            out[i] = s;
+        }
+    }
+
+    function cumProduct(uint256[] calldata arr) public pure returns (uint256[] memory out) {
+        out = new uint256[](arr.length);
+        if (arr.length == 0) return out;
+        uint256 p = 1;
+        for (uint256 i = 0; i < arr.length; i++) {
+            p *= arr[i];
+            if (arr[i] != 0 && p / arr[i] != (i == 0 ? 1 : p)) revert T369_ArithmeticOverflow();
+            out[i] = p;
+        }
+    }
+
+    function diffArray(uint256[] calldata arr) public pure returns (uint256[] memory out) {
+        if (arr.length <= 1) revert T369_ArrayLengthMismatch();
+        out = new uint256[](arr.length - 1);
+        for (uint256 i = 0; i < arr.length - 1; i++) {
+            if (arr[i + 1] < arr[i]) revert T369_ArithmeticOverflow();
+            out[i] = arr[i + 1] - arr[i];
+        }
+    }
+
+    function runningMin(uint256[] calldata arr) public pure returns (uint256[] memory out) {
+        out = new uint256[](arr.length);
+        if (arr.length == 0) return out;
+        uint256 m = arr[0];
+        for (uint256 i = 0; i < arr.length; i++) {
+            if (arr[i] < m) m = arr[i];
+            out[i] = m;
+        }
+    }
+
+    function runningMax(uint256[] calldata arr) public pure returns (uint256[] memory out) {
+        out = new uint256[](arr.length);
+        if (arr.length == 0) return out;
+        uint256 m = arr[0];
+        for (uint256 i = 0; i < arr.length; i++) {
+            if (arr[i] > m) m = arr[i];
+            out[i] = m;
+        }
+    }
+
+    function sliceSum(uint256[] calldata arr, uint256 start, uint256 length) public pure returns (uint256) {
+        if (start + length > arr.length) revert T369_ArrayLengthMismatch();
+        uint256 s = 0;
+        for (uint256 i = start; i < start + length; i++) {
