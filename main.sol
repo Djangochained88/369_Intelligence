@@ -1358,3 +1358,71 @@ contract Intelligence369 {
     }
 
     function isInTriadCycle(uint256 value, uint256 phase) public pure returns (bool) {
+        return (value % triadSum()) == phase;
+    }
+
+    function scaleToTriad(uint256 value) public pure returns (uint256) {
+        return (value * T369_TRIAD_A + value * T369_TRIAD_B + value * T369_TRIAD_C);
+    }
+
+    function triadWeightedSum(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        return a * T369_TRIAD_A + b * T369_TRIAD_B + c * T369_TRIAD_C;
+    }
+
+    function triadNormalize(uint256 a, uint256 b, uint256 c) public pure returns (uint256 sum) {
+        sum = a + b + c;
+        if (sum < a) revert T369_ArithmeticOverflow();
+    }
+
+    function resonanceProduct(uint256 a, uint256 b) public pure returns (uint256) {
+        uint256 p = a * b;
+        if (b != 0 && p / b != a) revert T369_ArithmeticOverflow();
+        return p % T369_BASE;
+    }
+
+    function resonanceSum(uint256 a, uint256 b) public pure returns (uint256) {
+        uint256 s = (a % T369_BASE) + (b % T369_BASE);
+        return s % T369_BASE;
+    }
+
+    function magnitudeFloor(uint256 value, uint256 step) public pure returns (uint256) {
+        if (step == 0) revert T369_DivisionByZero();
+        return (value / step) * step;
+    }
+
+    function magnitudeCeil(uint256 value, uint256 step) public pure returns (uint256) {
+        if (step == 0) revert T369_DivisionByZero();
+        return ((value + step - 1) / step) * step;
+    }
+
+    function roundToTriad(uint256 value) public pure returns (uint256) {
+        uint256 t = triadSum();
+        return (value / t) * t;
+    }
+
+    function roundUpToTriad(uint256 value) public pure returns (uint256) {
+        uint256 t = triadSum();
+        return ((value + t - 1) / t) * t;
+    }
+
+    function safeIncrement(uint256 x) public pure returns (uint256) {
+        if (x == type(uint256).max) revert T369_ArithmeticOverflow();
+        return x + 1;
+    }
+
+    function safeDecrement(uint256 x) public pure returns (uint256) {
+        if (x == 0) revert T369_ArithmeticOverflow();
+        return x - 1;
+    }
+
+    function fullMul(uint256 a, uint256 b) public pure returns (uint256 hi, uint256 lo) {
+        lo = a * b;
+        hi = (a != 0 && b != 0 && lo / a != b) ? 1 : 0;
+    }
+
+    function fullAdd(uint256 a, uint256 b) public pure returns (uint256 sum, bool overflow) {
+        sum = a + b;
+        overflow = sum < a;
+    }
+
+    function fullSub(uint256 a, uint256 b) public pure returns (uint256 diff, bool underflow) {
