@@ -1494,3 +1494,71 @@ contract Intelligence369 {
         return max3(a % T369_BASE, b % T369_BASE, c % T369_BASE);
     }
 
+    function harmonicTwoScaled(uint256 a, uint256 b, uint256 scale) public pure returns (uint256) {
+        if (a == 0 && b == 0) return 0;
+        if (a + b == 0) revert T369_DivisionByZero();
+        uint256 num = 2 * scale * a * b;
+        uint256 denom = (a + b) * scale;
+        if (denom == 0) revert T369_DivisionByZero();
+        return num / denom;
+    }
+
+    function geometricTwoScaled(uint256 a, uint256 b, uint256 scale) public pure returns (uint256) {
+        if (a == 0 || b == 0) return 0;
+        uint256 p = a * b;
+        if (p / a != b) revert T369_ArithmeticOverflow();
+        uint256 x = (a + b) / 2;
+        for (uint256 i = 0; i < 32; i++) {
+            if (x == 0) break;
+            uint256 nx = (x + p / x) / 2;
+            if (nx >= x) break;
+            x = nx;
+        }
+        return (x * scale) / T369_SCALE;
+    }
+
+    function sigmaSumSquares(uint256 n) public pure returns (uint256) {
+        if (n > 1e9) revert T369_MagnitudeBoundExceeded();
+        return (n * (n + 1) * (2 * n + 1)) / 6;
+    }
+
+    function sigmaSumCubes(uint256 n) public pure returns (uint256) {
+        if (n > 1e6) revert T369_MagnitudeBoundExceeded();
+        uint256 s = (n * (n + 1)) / 2;
+        return s * s;
+    }
+
+    function catalanNumber(uint256 n) public pure returns (uint256) {
+        if (n > 10) revert T369_MagnitudeBoundExceeded();
+        uint256 c = binomialCoeff(2 * n, n);
+        return c / (n + 1);
+    }
+
+    function stirlingSecond(uint256 n, uint256 k) public pure returns (uint256) {
+        if (k > n || n > 12) return 0;
+        if (k == 0) return n == 0 ? 1 : 0;
+        if (k == n) return 1;
+        uint256[] memory prev = new uint256[](k + 1);
+        uint256[] memory curr = new uint256[](k + 1);
+        prev[0] = 0;
+        prev[1] = 1;
+        for (uint256 i = 2; i <= n; i++) {
+            curr[0] = 0;
+            curr[1] = 1;
+            for (uint256 j = 2; j <= k && j <= i; j++) {
+                curr[j] = prev[j - 1] + j * prev[j];
+            }
+            for (uint256 j = 0; j <= k; j++) {
+                prev[j] = curr[j];
+            }
+        }
+        return curr[k];
+    }
+
+    function bellNumber(uint256 n) public pure returns (uint256) {
+        if (n > 15) revert T369_MagnitudeBoundExceeded();
+        uint256 b = 0;
+        for (uint256 k = 0; k <= n; k++) {
+            b += stirlingSecond(n, k);
+        }
+        return b;
