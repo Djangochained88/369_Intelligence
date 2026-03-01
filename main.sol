@@ -542,3 +542,71 @@ contract Intelligence369 {
         if (a2 / a != a || b2 / b != b) revert T369_ArithmeticOverflow();
         uint256 s = a2 + b2;
         if (s < a2) revert T369_ArithmeticOverflow();
+        return s;
+    }
+
+    function sumOfCubes(uint256 a, uint256 b) public pure returns (uint256) {
+        uint256 a3 = a * a * a;
+        uint256 b3 = b * b * b;
+        if (a3 / a / a != a || b3 / b / b != b) revert T369_ArithmeticOverflow();
+        uint256 s = a3 + b3;
+        if (s < a3) revert T369_ArithmeticOverflow();
+        return s;
+    }
+
+    function differenceOfSquares(uint256 a, uint256 b) public pure returns (uint256) {
+        if (a < b) revert T369_ArithmeticOverflow();
+        uint256 a2 = a * a;
+        uint256 b2 = b * b;
+        if (a2 / a != a || b2 / b != b) revert T369_ArithmeticOverflow();
+        return a2 - b2;
+    }
+
+    function totientApprox(uint256 n) public pure returns (uint256) {
+        if (n <= 1) return n;
+        uint256 r = n;
+        for (uint256 i = 2; i <= n && i <= 100; i++) {
+            if (n % i == 0) {
+                r = (r * (i - 1)) / i;
+                while (n % i == 0) n /= i;
+            }
+        }
+        return r;
+    }
+
+    function sigmaSum(uint256 n, uint256 k) public pure returns (uint256) {
+        if (k > n) return 0;
+        uint256 s = 0;
+        for (uint256 i = k; i <= n; i++) {
+            s += i;
+            if (s < i) revert T369_ArithmeticOverflow();
+        }
+        return s;
+    }
+
+    function sigmaProduct(uint256 n, uint256 k) public pure returns (uint256) {
+        if (k > n) return 0;
+        uint256 p = 1;
+        for (uint256 i = k; i <= n && i <= 20; i++) {
+            p *= i;
+            if (p / i != (i == k ? 1 : p)) revert T369_ArithmeticOverflow();
+        }
+        return p;
+    }
+
+    function triangularNumber(uint256 n) public pure returns (uint256) {
+        if (n > type(uint256).max / 2) revert T369_ArithmeticOverflow();
+        return (n * (n + 1)) / 2;
+    }
+
+    function isPerfectSquare(uint256 n) public pure returns (bool) {
+        if (n == 0) return true;
+        uint256 x = (n + 1) / 2;
+        for (uint256 i = 0; i < 32; i++) {
+            uint256 nx = (x + n / x) / 2;
+            if (nx >= x) return x * x == n;
+            x = nx;
+        }
+        return x * x == n;
+    }
+
