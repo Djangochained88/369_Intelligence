@@ -1630,3 +1630,71 @@ contract Intelligence369 {
     }
 
     function vortexToTriad(uint256 value) public pure returns (uint256) {
+        value = vortexReduction(value);
+        if (value == 0) return 0;
+        if (value == T369_TRIAD_A || value == T369_TRIAD_B || value == T369_TRIAD_C) return value;
+        return value % T369_TRIAD_C == 0 ? T369_TRIAD_C : value % T369_TRIAD_A;
+    }
+
+    function magnitudeClass(uint256 value) public pure returns (uint256) {
+        uint256 dc = digitCount(value);
+        if (dc <= 1) return 0;
+        if (dc <= 3) return 1;
+        if (dc <= 6) return 2;
+        if (dc <= 9) return 3;
+        return 4;
+    }
+
+    function triadClass(uint256 value) public pure returns (uint256) {
+        uint256 dr = digitalRoot(value);
+        if (dr == T369_TRIAD_A) return 1;
+        if (dr == T369_TRIAD_B) return 2;
+        if (dr == T369_TRIAD_C) return 3;
+        return 0;
+    }
+
+    function fluxClass(uint256 value) public pure returns (uint256) {
+        return (digitalRoot(value) * 10 + (value % 10)) % 100;
+    }
+
+    function checksum369(uint256 value) public pure returns (uint256) {
+        return (digitSum(value) + value % T369_BASE) % T369_BASE;
+    }
+
+    function validateTriadEncoding(uint256 encoded) public pure returns (bool) {
+        uint256 a = encoded / (T369_BASE * T369_BASE);
+        uint256 b = (encoded / T369_BASE) % T369_BASE;
+        uint256 c = encoded % T369_BASE;
+        return a < T369_BASE && b < T369_BASE && c < T369_BASE && verifyTriad(a, b, c);
+    }
+
+    function encodeTriadTriple(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        if (a >= T369_BASE || b >= T369_BASE || c >= T369_BASE) revert T369_MagnitudeBoundExceeded();
+        return a * T369_BASE * T369_BASE + b * T369_BASE + c;
+    }
+
+    function decodeTriadTriple(uint256 encoded) public pure returns (uint256 a, uint256 b, uint256 c) {
+        a = encoded / (T369_BASE * T369_BASE);
+        b = (encoded / T369_BASE) % T369_BASE;
+        c = encoded % T369_BASE;
+    }
+
+    function triadHash(bytes32 seed, uint256 value) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(seed, value, T369_BASE));
+    }
+
+    function magnitudeHash(uint256 a, uint256 b) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(a, b, T369_SCALE));
+    }
+
+    function phaseHash(uint256 phase) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(phase, T369_TRIAD_A, T369_TRIAD_B, T369_TRIAD_C));
+    }
+
+    function fluxSignature(uint256 inputVal, uint256 outputVal) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked("369_flux", inputVal, outputVal));
+    }
+
+    function resonanceSignature(uint256[] calldata values) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(values, T369_DOMAIN));
+    }
