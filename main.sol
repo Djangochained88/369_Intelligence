@@ -746,3 +746,71 @@ contract Intelligence369 {
     function clamp(uint256 value, uint256 lo, uint256 hi) public pure returns (uint256) {
         if (value < lo) return lo;
         if (value > hi) return hi;
+        return value;
+    }
+
+    function absDiff(uint256 a, uint256 b) public pure returns (uint256) {
+        return a > b ? a - b : b - a;
+    }
+
+    function percentOf(uint256 part, uint256 whole) public pure returns (uint256) {
+        if (whole == 0) revert T369_DivisionByZero();
+        return (part * 100) / whole;
+    }
+
+    function percentOfScaled(uint256 part, uint256 whole, uint256 scale) public pure returns (uint256) {
+        if (whole == 0) revert T369_DivisionByZero();
+        uint256 t = part * scale;
+        if (t / part != scale) revert T369_ArithmeticOverflow();
+        return t / whole;
+    }
+
+    function compoundFactor(uint256 ratePerUnit, uint256 periods) public pure returns (uint256) {
+        uint256 r = 1e18;
+        for (uint256 i = 0; i < periods && i < 100; i++) {
+            r = (r * (1e18 + ratePerUnit)) / 1e18;
+        }
+        return r;
+    }
+
+    function linearInterpolate(uint256 x0, uint256 y0, uint256 x1, uint256 y1, uint256 x) public pure returns (uint256) {
+        if (x1 == x0) return y0;
+        uint256 dx = x1 - x0;
+        uint256 t = x - x0;
+        if (y1 >= y0) {
+            uint256 dy = y1 - y0;
+            uint256 num = t * dy;
+            if (dy != 0 && num / dy != t) revert T369_ArithmeticOverflow();
+            return y0 + num / dx;
+        } else {
+            uint256 dy = y0 - y1;
+            uint256 num = t * dy;
+            if (dy != 0 && num / dy != t) revert T369_ArithmeticOverflow();
+            return y0 - num / dx;
+        }
+    }
+
+    function weightedAverage(uint256[] calldata values, uint256[] calldata weights) public pure returns (uint256) {
+        if (values.length != weights.length || values.length == 0) revert T369_ArrayLengthMismatch();
+        uint256 sumW = 0;
+        uint256 sumVW = 0;
+        for (uint256 i = 0; i < values.length; i++) {
+            sumW += weights[i];
+            uint256 vw = values[i] * weights[i];
+            if (vw / values[i] != weights[i]) revert T369_ArithmeticOverflow();
+            sumVW += vw;
+        }
+        if (sumW == 0) revert T369_DivisionByZero();
+        return sumVW / sumW;
+    }
+
+    function varianceApprox(uint256[] calldata arr) public pure returns (uint256) {
+        if (arr.length == 0) revert T369_EmptyOperands();
+        uint256 s = sumArray(arr);
+        uint256 mean = s / arr.length;
+        uint256 varSum = 0;
+        for (uint256 i = 0; i < arr.length; i++) {
+            uint256 d = arr[i] > mean ? arr[i] - mean : mean - arr[i];
+            varSum += d * d;
+        }
+        return varSum / arr.length;
