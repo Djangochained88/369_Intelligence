@@ -678,3 +678,71 @@ contract Intelligence369 {
         return 3 * n + 1;
     }
 
+    function digitCount(uint256 value) public pure returns (uint256) {
+        if (value == 0) return 1;
+        uint256 c = 0;
+        while (value != 0) {
+            c++;
+            value /= 10;
+        }
+        return c;
+    }
+
+    function reverseDigits(uint256 value) public pure returns (uint256) {
+        uint256 r = 0;
+        while (value != 0) {
+            r = r * 10 + (value % 10);
+            value /= 10;
+        }
+        return r;
+    }
+
+    function isPalindrome(uint256 value) public pure returns (bool) {
+        return value == reverseDigits(value);
+    }
+
+    function digitProduct(uint256 value) public pure returns (uint256) {
+        if (value == 0) return 0;
+        uint256 p = 1;
+        while (value != 0) {
+            p *= (value % 10);
+            value /= 10;
+        }
+        return p;
+    }
+
+    function alternatingDigitSum(uint256 value) public pure returns (int256) {
+        int256 sum = 0;
+        int256 sign = 1;
+        while (value != 0) {
+            sum += sign * int256(int256(value % 10));
+            sign = -sign;
+            value /= 10;
+        }
+        return sum;
+    }
+
+    function min3(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        uint256 m = a;
+        if (b < m) m = b;
+        if (c < m) m = c;
+        return m;
+    }
+
+    function max3(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        uint256 m = a;
+        if (b > m) m = b;
+        if (c > m) m = c;
+        return m;
+    }
+
+    function median3(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        if (a > b) (a, b) = (b, a);
+        if (b > c) (b, c) = (c, b);
+        if (a > b) (a, b) = (b, a);
+        return b;
+    }
+
+    function clamp(uint256 value, uint256 lo, uint256 hi) public pure returns (uint256) {
+        if (value < lo) return lo;
+        if (value > hi) return hi;
