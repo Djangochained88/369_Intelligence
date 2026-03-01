@@ -474,3 +474,71 @@ contract Intelligence369 {
         for (uint256 i = 0; i < maxIter && s > 9; i++) {
             s = digitSum(s);
         }
+        return s;
+    }
+
+    function isMultipleOfThree(uint256 value) public pure returns (bool) {
+        return value % T369_TRIAD_A == 0;
+    }
+
+    function isMultipleOfSix(uint256 value) public pure returns (bool) {
+        return value % T369_TRIAD_B == 0;
+    }
+
+    function isMultipleOfNine(uint256 value) public pure returns (bool) {
+        return value % T369_TRIAD_C == 0;
+    }
+
+    function triadReduction(uint256 value) public pure returns (uint256) {
+        uint256 r = value % triadSum();
+        return r;
+    }
+
+    function fluxCoefficient(uint256 a, uint256 b) public pure returns (uint256) {
+        if (b == 0) revert T369_DivisionByZero();
+        uint256 c = (a * T369_SCALE) / b;
+        return c;
+    }
+
+    function harmonicTriad(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        if (a == 0 || b == 0 || c == 0) return 0;
+        uint256 ab = a * b;
+        uint256 bc = b * c;
+        uint256 ac = a * c;
+        if (ab / a != b || bc / b != c || ac / a != c) revert T369_ArithmeticOverflow();
+        uint256 denom = ab + bc + ac;
+        if (denom == 0) revert T369_DivisionByZero();
+        uint256 num = tripleProduct(3, a, b);
+        num = num * c;
+        if (num / c != tripleProduct(3, a, b)) revert T369_ArithmeticOverflow();
+        return num / denom;
+    }
+
+    function geometricTriadApprox(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        uint256 g1 = geometricMeanApprox(a, b);
+        return geometricMeanApprox(g1, c);
+    }
+
+    function arithmeticTriad(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        uint256 s = a + b + c;
+        if (s < a) revert T369_ArithmeticOverflow();
+        return s / 3;
+    }
+
+    function quadraticResidue(uint256 a, uint256 p) public pure returns (uint256) {
+        if (p == 0) revert T369_DivisionByZero();
+        return (a * a) % p;
+    }
+
+    function cubicResidue(uint256 a, uint256 p) public pure returns (uint256) {
+        if (p == 0) revert T369_DivisionByZero();
+        uint256 a2 = (a * a) % p;
+        return (a2 * a) % p;
+    }
+
+    function sumOfSquares(uint256 a, uint256 b) public pure returns (uint256) {
+        uint256 a2 = a * a;
+        uint256 b2 = b * b;
+        if (a2 / a != a || b2 / b != b) revert T369_ArithmeticOverflow();
+        uint256 s = a2 + b2;
+        if (s < a2) revert T369_ArithmeticOverflow();
