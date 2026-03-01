@@ -814,3 +814,71 @@ contract Intelligence369 {
             varSum += d * d;
         }
         return varSum / arr.length;
+    }
+
+    function minArray(uint256[] calldata arr) public pure returns (uint256) {
+        if (arr.length == 0) revert T369_EmptyOperands();
+        uint256 m = arr[0];
+        for (uint256 i = 1; i < arr.length; i++) {
+            if (arr[i] < m) m = arr[i];
+        }
+        return m;
+    }
+
+    function maxArray(uint256[] calldata arr) public pure returns (uint256) {
+        if (arr.length == 0) revert T369_EmptyOperands();
+        uint256 m = arr[0];
+        for (uint256 i = 1; i < arr.length; i++) {
+            if (arr[i] > m) m = arr[i];
+        }
+        return m;
+    }
+
+    function rangeArray(uint256[] calldata arr) public pure returns (uint256 minVal, uint256 maxVal) {
+        if (arr.length == 0) revert T369_EmptyOperands();
+        minVal = arr[0];
+        maxVal = arr[0];
+        for (uint256 i = 1; i < arr.length; i++) {
+            if (arr[i] < minVal) minVal = arr[i];
+            if (arr[i] > maxVal) maxVal = arr[i];
+        }
+    }
+
+    function countTriadResonantInArray(uint256[] calldata arr) public pure returns (uint256) {
+        uint256 c = 0;
+        for (uint256 i = 0; i < arr.length; i++) {
+            if (isTriadResonant(arr[i])) c++;
+        }
+        return c;
+    }
+
+    function sumDigitsBatch(uint256[] calldata values) public pure returns (uint256[] memory sums) {
+        sums = new uint256[](values.length);
+        for (uint256 i = 0; i < values.length; i++) {
+            sums[i] = digitSum(values[i]);
+        }
+    }
+
+    function digitalRootBatch(uint256[] calldata values) public pure returns (uint256[] memory roots) {
+        roots = new uint256[](values.length);
+        for (uint256 i = 0; i < values.length; i++) {
+            roots[i] = digitalRoot(values[i]);
+        }
+    }
+
+    function scaledBatch(uint256[] calldata values, uint256 scale) public pure returns (uint256[] memory out) {
+        out = new uint256[](values.length);
+        for (uint256 i = 0; i < values.length; i++) {
+            uint256 t = values[i] * scale;
+            if (scale != 0 && t / values[i] != scale) revert T369_ArithmeticOverflow();
+            out[i] = t;
+        }
+    }
+
+    function mulDivBatch(uint256[] calldata a, uint256[] calldata b, uint256[] calldata denom) public pure returns (uint256[] memory out) {
+        if (a.length != b.length || b.length != denom.length) revert T369_ArrayLengthMismatch();
+        out = new uint256[](a.length);
+        for (uint256 i = 0; i < a.length; i++) {
+            out[i] = mulDiv(a[i], b[i], denom[i]);
+        }
+    }
