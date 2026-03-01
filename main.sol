@@ -1222,3 +1222,71 @@ contract Intelligence369 {
         if (copy.length % 2 == 1) return copy[copy.length / 2];
         return (copy[copy.length / 2 - 1] + copy[copy.length / 2]) / 2;
     }
+
+    function percentileApprox(uint256[] calldata arr, uint256 pct) public pure returns (uint256) {
+        if (arr.length == 0 || pct > 100) revert T369_EmptyOperands();
+        uint256 idx = (arr.length * pct) / 100;
+        if (idx >= arr.length) idx = arr.length - 1;
+        uint256[] memory copy = new uint256[](arr.length);
+        for (uint256 i = 0; i < arr.length; i++) copy[i] = arr[i];
+        for (uint256 i = 0; i < copy.length; i++) {
+            for (uint256 j = i + 1; j < copy.length; j++) {
+                if (copy[j] < copy[i]) {
+                    uint256 t = copy[i];
+                    copy[i] = copy[j];
+                    copy[j] = t;
+                }
+            }
+        }
+        return copy[idx];
+    }
+
+    function countEqual(uint256[] calldata arr, uint256 value) public pure returns (uint256) {
+        uint256 c = 0;
+        for (uint256 i = 0; i < arr.length; i++) {
+            if (arr[i] == value) c++;
+        }
+        return c;
+    }
+
+    function countGreater(uint256[] calldata arr, uint256 value) public pure returns (uint256) {
+        uint256 c = 0;
+        for (uint256 i = 0; i < arr.length; i++) {
+            if (arr[i] > value) c++;
+        }
+        return c;
+    }
+
+    function countLess(uint256[] calldata arr, uint256 value) public pure returns (uint256) {
+        uint256 c = 0;
+        for (uint256 i = 0; i < arr.length; i++) {
+            if (arr[i] < value) c++;
+        }
+        return c;
+    }
+
+    function indexOf(uint256[] calldata arr, uint256 value) public pure returns (uint256) {
+        for (uint256 i = 0; i < arr.length; i++) {
+            if (arr[i] == value) return i;
+        }
+        revert T369_InvalidSlot();
+    }
+
+    function lastIndexOf(uint256[] calldata arr, uint256 value) public pure returns (uint256) {
+        for (uint256 i = arr.length; i > 0;) {
+            unchecked { i--; }
+            if (arr[i] == value) return i;
+        }
+        revert T369_InvalidSlot();
+    }
+
+    function anyTriadResonant(uint256[] calldata arr) public pure returns (bool) {
+        for (uint256 i = 0; i < arr.length; i++) {
+            if (isTriadResonant(arr[i])) return true;
+        }
+        return false;
+    }
+
+    function allTriadResonant(uint256[] calldata arr) public pure returns (bool) {
+        for (uint256 i = 0; i < arr.length; i++) {
+            if (!isTriadResonant(arr[i])) return false;
