@@ -1154,3 +1154,71 @@ contract Intelligence369 {
         if (start + length > arr.length) revert T369_ArrayLengthMismatch();
         uint256 s = 0;
         for (uint256 i = start; i < start + length; i++) {
+            s += arr[i];
+            if (s < arr[i]) revert T369_ArithmeticOverflow();
+        }
+        return s;
+    }
+
+    function sliceProduct(uint256[] calldata arr, uint256 start, uint256 length) public pure returns (uint256) {
+        if (start + length > arr.length || length > T369_MAX_OPERANDS) revert T369_ArrayLengthMismatch();
+        uint256 p = 1;
+        for (uint256 i = start; i < start + length; i++) {
+            uint256 prev = p;
+            p *= arr[i];
+            if (arr[i] != 0 && p / arr[i] != prev) revert T369_ArithmeticOverflow();
+        }
+        return p;
+    }
+
+    function replicate(uint256 value, uint256 times) public pure returns (uint256[] memory out) {
+        if (times > T369_MAX_OPERANDS) revert T369_MagnitudeBoundExceeded();
+        out = new uint256[](times);
+        for (uint256 i = 0; i < times; i++) {
+            out[i] = value;
+        }
+    }
+
+    function concatSum(uint256[] calldata a, uint256[] calldata b) public pure returns (uint256) {
+        return sumArray(a) + sumArray(b);
+    }
+
+    function concatProduct(uint256[] calldata a, uint256[] calldata b) public pure returns (uint256) {
+        uint256 pa = 1;
+        for (uint256 i = 0; i < a.length && i < 8; i++) {
+            uint256 prev = pa;
+            pa *= a[i];
+            if (a[i] != 0 && pa / a[i] != prev) revert T369_ArithmeticOverflow();
+        }
+        uint256 pb = 1;
+        for (uint256 i = 0; i < b.length && i < 8; i++) {
+            uint256 prev = pb;
+            pb *= b[i];
+            if (b[i] != 0 && pb / b[i] != prev) revert T369_ArithmeticOverflow();
+        }
+        uint256 p = pa * pb;
+        if (pb != 0 && p / pb != pa) revert T369_ArithmeticOverflow();
+        return p;
+    }
+
+    function meanArray(uint256[] calldata arr) public pure returns (uint256) {
+        if (arr.length == 0) revert T369_EmptyOperands();
+        return sumArray(arr) / arr.length;
+    }
+
+    function medianArray(uint256[] calldata arr) public pure returns (uint256) {
+        if (arr.length == 0) revert T369_EmptyOperands();
+        uint256[] memory copy = new uint256[](arr.length);
+        for (uint256 i = 0; i < arr.length; i++) copy[i] = arr[i];
+        for (uint256 i = 0; i < copy.length; i++) {
+            for (uint256 j = i + 1; j < copy.length; j++) {
+                if (copy[j] < copy[i]) {
+                    uint256 t = copy[i];
+                    copy[i] = copy[j];
+                    copy[j] = t;
+                }
+            }
+        }
+        if (copy.length % 2 == 1) return copy[copy.length / 2];
+        return (copy[copy.length / 2 - 1] + copy[copy.length / 2]) / 2;
+    }
