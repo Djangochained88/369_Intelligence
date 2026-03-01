@@ -1426,3 +1426,71 @@ contract Intelligence369 {
     }
 
     function fullSub(uint256 a, uint256 b) public pure returns (uint256 diff, bool underflow) {
+        underflow = b > a;
+        diff = a - b;
+    }
+
+    // -------------------------------------------------------------------------
+    // TESLA MAGNITUDE HELPERS (pure)
+    // -------------------------------------------------------------------------
+
+    function teslaBaseScale() public pure returns (uint256) {
+        return T369_BASE * T369_SCALE;
+    }
+
+    function triadRatio(uint256 a, uint256 b) public pure returns (uint256) {
+        if (b == 0) revert T369_DivisionByZero();
+        return (a * T369_SCALE) / b;
+    }
+
+    function triadRatio369(uint256 a, uint256 b) public pure returns (uint256) {
+        if (b == 0) revert T369_DivisionByZero();
+        return (a * T369_BASE) / b;
+    }
+
+    function magnitudeToPhase(uint256 mag) public pure returns (uint256) {
+        return mag % (T369_TRIAD_A + T369_TRIAD_B + T369_TRIAD_C);
+    }
+
+    function phaseToMagnitude(uint256 phase) public pure returns (uint256) {
+        return phase * T369_SCALE;
+    }
+
+    function digitSumMod9(uint256 value) public pure returns (uint256) {
+        return digitSum(value) % T369_TRIAD_C;
+    }
+
+    function digitSumMod3(uint256 value) public pure returns (uint256) {
+        return digitSum(value) % T369_TRIAD_A;
+    }
+
+    function isDivisibleByTriadSum(uint256 value) public pure returns (bool) {
+        return value % triadSum() == 0;
+    }
+
+    function triadQuotient(uint256 value) public pure returns (uint256) {
+        return value / triadSum();
+    }
+
+    function triadRemainder(uint256 value) public pure returns (uint256) {
+        return value % triadSum();
+    }
+
+    function encodeTriadPair(uint256 a, uint256 b) public pure returns (uint256) {
+        if (a >= T369_BASE || b >= T369_BASE) revert T369_MagnitudeBoundExceeded();
+        return a * T369_BASE + b;
+    }
+
+    function decodeTriadPair(uint256 encoded) public pure returns (uint256 a, uint256 b) {
+        a = encoded / T369_BASE;
+        b = encoded % T369_BASE;
+    }
+
+    function triadMin(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        return min3(a % T369_BASE, b % T369_BASE, c % T369_BASE);
+    }
+
+    function triadMax(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+        return max3(a % T369_BASE, b % T369_BASE, c % T369_BASE);
+    }
+
