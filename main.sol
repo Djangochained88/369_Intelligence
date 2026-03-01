@@ -1562,3 +1562,71 @@ contract Intelligence369 {
             b += stirlingSecond(n, k);
         }
         return b;
+    }
+
+    function eulerPartition(uint256 n) public pure returns (uint256) {
+        if (n > 25) revert T369_MagnitudeBoundExceeded();
+        uint256[26] memory p = [uint256(1), 1, 2, 3, 5, 7, 11, 15, 22, 30, 42, 56, 77, 101, 135, 176, 231, 297, 385, 490, 627, 792, 1002, 1255, 1575, 1958];
+        return p[n];
+    }
+
+    function isTriangular(uint256 t) public pure returns (bool) {
+        if (t == 0) return true;
+        uint256 n = sqrtFloor(8 * t + 1);
+        return n * n == 8 * t + 1 && (n - 1) % 2 == 0;
+    }
+
+    function triangularIndex(uint256 t) public pure returns (uint256) {
+        if (t == 0) return 0;
+        if (!isTriangular(t)) revert T369_InvalidTriad();
+        return (sqrtFloor(8 * t + 1) - 1) / 2;
+    }
+
+    function pentagonalNumber(uint256 n) public pure returns (uint256) {
+        if (n > type(uint256).max / 3) revert T369_ArithmeticOverflow();
+        return (n * (3 * n - 1)) / 2;
+    }
+
+    function hexagonalNumber(uint256 n) public pure returns (uint256) {
+        if (n > type(uint256).max / 2) revert T369_ArithmeticOverflow();
+        return n * (2 * n - 1);
+    }
+
+    function heptagonalNumber(uint256 n) public pure returns (uint256) {
+        if (n > type(uint256).max / 5) revert T369_ArithmeticOverflow();
+        return (n * (5 * n - 3)) / 2;
+    }
+
+    function octagonalNumber(uint256 n) public pure returns (uint256) {
+        if (n > type(uint256).max / 3) revert T369_ArithmeticOverflow();
+        return n * (3 * n - 2);
+    }
+
+    function polygonalNumber(uint256 sides, uint256 n) public pure returns (uint256) {
+        if (sides < 3 || n > type(uint256).max / (sides - 2)) revert T369_ArithmeticOverflow();
+        return (n * ((sides - 2) * n - (sides - 4))) / 2;
+    }
+
+    function collatzLength(uint256 n) public pure returns (uint256) {
+        if (n == 0) revert T369_ZeroMagnitude();
+        uint256 len = 0;
+        while (n != 1 && len < 500) {
+            n = collatzStep(n);
+            len++;
+        }
+        return len;
+    }
+
+    function digitRootCycle(uint256 value) public pure returns (uint256) {
+        uint256 dr = digitalRoot(value);
+        return (dr == 0 ? 9 : dr);
+    }
+
+    function vortexReduction(uint256 value) public pure returns (uint256) {
+        while (value >= T369_BASE) {
+            value = digitSum(value);
+        }
+        return value;
+    }
+
+    function vortexToTriad(uint256 value) public pure returns (uint256) {
