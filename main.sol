@@ -1018,3 +1018,71 @@ contract Intelligence369 {
     function bitCount(uint256 n) public pure returns (uint256) {
         uint256 c = 0;
         while (n != 0) {
+            c += n & 1;
+            n >>= 1;
+        }
+        return c;
+    }
+
+    function parity(uint256 n) public pure returns (uint256) {
+        return bitCount(n) % 2;
+    }
+
+    function rotateLeft(uint256 n, uint256 k) public pure returns (uint256) {
+        k = k % 256;
+        return (n << k) | (n >> (256 - k));
+    }
+
+    function rotateRight(uint256 n, uint256 k) public pure returns (uint256) {
+        k = k % 256;
+        return (n >> k) | (n << (256 - k));
+    }
+
+    function xorAll(uint256[] calldata arr) public pure returns (uint256) {
+        if (arr.length == 0) revert T369_EmptyOperands();
+        uint256 r = arr[0];
+        for (uint256 i = 1; i < arr.length; i++) {
+            r ^= arr[i];
+        }
+        return r;
+    }
+
+    function andAll(uint256[] calldata arr) public pure returns (uint256) {
+        if (arr.length == 0) revert T369_EmptyOperands();
+        uint256 r = type(uint256).max;
+        for (uint256 i = 0; i < arr.length; i++) {
+            r &= arr[i];
+        }
+        return r;
+    }
+
+    function orAll(uint256[] calldata arr) public pure returns (uint256) {
+        if (arr.length == 0) revert T369_EmptyOperands();
+        uint256 r = 0;
+        for (uint256 i = 0; i < arr.length; i++) {
+            r |= arr[i];
+        }
+        return r;
+    }
+
+    function sumOfPowers(uint256 base, uint256 n) public pure returns (uint256) {
+        if (base == 0) return 0;
+        if (base == 1) return n + 1;
+        uint256 s = 0;
+        uint256 term = 1;
+        for (uint256 i = 0; i <= n && i < 50; i++) {
+            s += term;
+            term = term * base;
+            if (term / base != (i == 0 ? 1 : term)) revert T369_ArithmeticOverflow();
+        }
+        return s;
+    }
+
+    function polyEval(uint256[] calldata coeffs, uint256 x) public pure returns (uint256) {
+        if (coeffs.length == 0) revert T369_EmptyOperands();
+        uint256 r = coeffs[coeffs.length - 1];
+        for (uint256 i = coeffs.length - 1; i > 0;) {
+            unchecked { i--; }
+            r = r * x + coeffs[i];
+        }
+        return r;
