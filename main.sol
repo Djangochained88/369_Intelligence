@@ -1698,3 +1698,65 @@ contract Intelligence369 {
     function resonanceSignature(uint256[] calldata values) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(values, T369_DOMAIN));
     }
+
+    function slotChecksum(uint256 slot, uint256 value) public pure returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(slot, value))) % T369_BASE;
+    }
+
+    function blockResonance(uint256 blockNum) public pure returns (uint256) {
+        return (blockNum * T369_TRIAD_A + blockNum * T369_TRIAD_B + blockNum * T369_TRIAD_C) % T369_BASE;
+    }
+
+    function timestampResonance(uint256 ts) public pure returns (uint256) {
+        return (ts % T369_BASE) * (T369_TRIAD_A + T369_TRIAD_B + T369_TRIAD_C);
+    }
+
+    function combineMagnitudePhase(uint256 mag, uint256 phase) public pure returns (uint256) {
+        if (phase >= T369_SCALE) revert T369_PhaseOutOfRange();
+        return mag * T369_SCALE + phase;
+    }
+
+    function splitMagnitudePhase(uint256 combined) public pure returns (uint256 mag, uint256 phase) {
+        mag = combined / T369_SCALE;
+        phase = combined % T369_SCALE;
+    }
+
+    function triadNonce(uint256 a, uint256 b, uint256 c, uint256 salt) public pure returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(a, b, c, salt))) % (T369_BASE * T369_BASE);
+    }
+
+    function magnitudeNonce(uint256 value, uint256 salt) public pure returns (uint256) {
+        return (value + salt) % T369_MAX_MAGNITUDE;
+    }
+
+    function resonanceNonce(bytes32 seed) public pure returns (uint256) {
+        return uint256(seed) % T369_BASE;
+    }
+
+    // -------------------------------------------------------------------------
+    // META / INFO
+    // -------------------------------------------------------------------------
+
+    function domainHash() external pure returns (bytes32) {
+        return T369_DOMAIN;
+    }
+
+    function versionHash() external pure returns (bytes32) {
+        return T369_VERSION;
+    }
+
+    function blockPhase() external view returns (uint256) {
+        return phaseInCycle(block.timestamp);
+    }
+
+    function isPhaseAligned() external view returns (bool) {
+        return phaseInCycle(block.timestamp) == currentPhase;
+    }
+
+    receive() external payable {
+        if (msg.value > 0) {
+            (bool ok,) = keeper.call{value: msg.value}("");
+            require(ok, "T369_TransferFail");
+        }
+    }
+}
