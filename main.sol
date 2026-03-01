@@ -950,3 +950,71 @@ contract Intelligence369 {
         uint256 s = a + b;
         if (s < a) revert T369_ArithmeticOverflow();
         s += c;
+        if (s < c) revert T369_ArithmeticOverflow();
+        return s;
+    }
+
+    function add4(uint256 a, uint256 b, uint256 c, uint256 d) public pure returns (uint256) {
+        uint256 s = add3(a, b, c);
+        s += d;
+        if (s < d) revert T369_ArithmeticOverflow();
+        return s;
+    }
+
+    function subSafe(uint256 a, uint256 b) public pure returns (uint256) {
+        if (b > a) revert T369_ArithmeticOverflow();
+        return a - b;
+    }
+
+    function mulSafe(uint256 a, uint256 b) public pure returns (uint256) {
+        uint256 p = a * b;
+        if (b != 0 && p / b != a) revert T369_ArithmeticOverflow();
+        return p;
+    }
+
+    function divCeil(uint256 a, uint256 b) public pure returns (uint256) {
+        if (b == 0) revert T369_DivisionByZero();
+        return (a + b - 1) / b;
+    }
+
+    function modSafe(uint256 a, uint256 b) public pure returns (uint256) {
+        if (b == 0) revert T369_DivisionByZero();
+        return a % b;
+    }
+
+    function exp2(uint256 n) public pure returns (uint256) {
+        if (n > 255) revert T369_ArithmeticOverflow();
+        return 1 << n;
+    }
+
+    function log2Floor(uint256 n) public pure returns (uint256) {
+        if (n == 0) revert T369_ZeroMagnitude();
+        uint256 r = 0;
+        while (n > 1) {
+            n >>= 1;
+            r++;
+        }
+        return r;
+    }
+
+    function isPowerOfTwo(uint256 n) public pure returns (bool) {
+        return n != 0 && (n & (n - 1)) == 0;
+    }
+
+    function nextPowerOfTwo(uint256 n) public pure returns (uint256) {
+        if (n == 0) return 1;
+        n--;
+        n |= n >> 1;
+        n |= n >> 2;
+        n |= n >> 4;
+        n |= n >> 8;
+        n |= n >> 16;
+        n |= n >> 32;
+        n |= n >> 64;
+        n |= n >> 128;
+        return n + 1;
+    }
+
+    function bitCount(uint256 n) public pure returns (uint256) {
+        uint256 c = 0;
+        while (n != 0) {
