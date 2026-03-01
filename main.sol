@@ -610,3 +610,71 @@ contract Intelligence369 {
         return x * x == n;
     }
 
+    function sqrtFloor(uint256 n) public pure returns (uint256) {
+        if (n == 0) return 0;
+        uint256 x = n;
+        uint256 y = (x + 1) / 2;
+        while (y < x) {
+            x = y;
+            y = (x + n / x) / 2;
+        }
+        return x;
+    }
+
+    function pow2(uint256 exp) public pure returns (uint256) {
+        if (exp > 255) revert T369_ArithmeticOverflow();
+        return 1 << exp;
+    }
+
+    function pow3(uint256 exp) public pure returns (uint256) {
+        if (exp > 160) revert T369_ArithmeticOverflow();
+        uint256 r = 1;
+        uint256 b = 3;
+        while (exp > 0) {
+            if (exp & 1 != 0) {
+                r = r * b;
+                if (exp == 1) break;
+            }
+            b = b * b;
+            exp >>= 1;
+        }
+        return r;
+    }
+
+    function modInverseApprox(uint256 a, uint256 m) public pure returns (uint256) {
+        if (m == 0 || gcd(a, m) != 1) revert T369_DivisionByZero();
+        return powMod(a, m - 2, m);
+    }
+
+    function binomialCoeff(uint256 n, uint256 k) public pure returns (uint256) {
+        if (k > n) return 0;
+        if (k == 0 || k == n) return 1;
+        if (k > n - k) k = n - k;
+        uint256 r = 1;
+        for (uint256 i = 0; i < k; i++) {
+            r = (r * (n - i)) / (i + 1);
+        }
+        return r;
+    }
+
+    function fibonacci(uint256 n) public pure returns (uint256) {
+        if (n == 0) return 0;
+        if (n <= 2) return 1;
+        uint256 a = 1;
+        uint256 b = 1;
+        for (uint256 i = 3; i <= n && i <= 94; i++) {
+            uint256 c = a + b;
+            if (c < b) revert T369_ArithmeticOverflow();
+            a = b;
+            b = c;
+        }
+        return b;
+    }
+
+    function collatzStep(uint256 n) public pure returns (uint256) {
+        if (n == 0) revert T369_ZeroMagnitude();
+        if (n % 2 == 0) return n / 2;
+        if (n > type(uint256).max / 3 - 1) revert T369_ArithmeticOverflow();
+        return 3 * n + 1;
+    }
+
